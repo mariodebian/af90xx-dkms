@@ -1,0 +1,11 @@
+Source: af90xx-dkms
+Section: kernel
+Priority: optional
+Maintainer: Mario Izquierdo (mariodebian) <mariodebian@gmail.com>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.9.1
+
+Package: af90xx-dkms
+Architecture: all
+Depends: dkms (>= 1.95), ${misc:Depends}
+Description: Afatech AF9035 kernel module

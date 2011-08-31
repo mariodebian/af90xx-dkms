@@ -1,0 +1,68 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+#MODS=af9013 af9033 dvb-core dvb-usb-af9005 dvb-usb-af9015 dvb-usb-af9035 dvb-usb mxl5007t tua9001
+MODS=af9033 dvb-core dvb-usb-af9035 dvb-usb mxl5007t tua9001
+export I=0
+
+# Name of the dkms package
+pdkms:=af90xx-dkms
+
+# The short upstream name, used for the module source directory
+sname:=af90xx
+
+sversion:=$(shell dpkg-parsechangelog|grep "^Version:"|cut -d" " -f2|rev|cut -d- -f2-|rev|cut -d':' -f2)
+
+
+build:
+
+clean:
+	dh_testdir
+	dh_clean
+
+install: DH_OPTIONS=
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	dh_installdirs -p$(pdkms)  usr/src/$(sname)-$(sversion) lib/firmware
+
+	cp -ra firmware/* debian/$(pdkms)/lib/firmware
+
+	cp -ra Makefile dvb debian/$(pdkms)/usr/src/$(sname)-$(sversion)
+
+	sed "s/__VERSION__/$(sversion)/g" debian/dkms.conf.in > debian/$(pdkms)/usr/src/$(sname)-$(sversion)/dkms.conf
+
+	@for mod in $(MODS); do \
+		echo BUILT_MODULE_LOCATION[$$I]="dvb/" ;\
+		echo BUILT_MODULE_NAME[$$I]="$$mod" ;\
+		echo "DEST_MODULE_LOCATION[$$I]=/updates/dkms" ;\
+		I=`expr $$I + 1` ;\
+		echo ;\
+	done >> debian/$(pdkms)/usr/src/$(sname)-$(sversion)/dkms.conf 
+
+
+	dh_install
+
+binary-arch: build install
+
+binary-indep: build install
+	dh_testdir
+	dh_testroot
+	dh_installdocs
+	dh_installchangelogs
+	dh_install
+	dh_link
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install kdist kdist_configure kdist_image kdist_clean

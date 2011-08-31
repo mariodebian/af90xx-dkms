@@ -1,0 +1,18 @@
+Format-Specification:
+ http://wiki.debian.org/Proposals/CopyrightFormat?action=recall&rev=454
+Upstream-Name: af90xx
+Upstream-Maintainer: Antti Palosaari <crope@iki.fi>
+Upstream-Source: http://palosaari.fi/linux/
+
+Files: *
+Copyright: © 2006-2009 Antti Palosaari <crope@iki.fi>
+License: GPL-2+
+
+
+Files: debian/*
+Copyright: © 2011 Mario Izquierdo (mariodebian) <mariodebian@gmail.com>
+License: GPL-2+
+
+License: GPL-2 | GPL-2+
+ On Debian systems, the complete text of the GNU General Public License
+ Version 2 can be found in the /usr/share/common-licenses/GPL-2 file.

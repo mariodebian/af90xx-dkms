@@ -1,0 +1,9 @@
+Package: af90xx-dkms
+Version: 0.0.3-0ppa3
+Architecture: all
+Maintainer: Mario Izquierdo (mariodebian) <mariodebian@gmail.com>
+Installed-Size: 1664
+Depends: dkms (>= 1.95)
+Section: kernel
+Priority: optional
+Description: Afatech AF9035 kernel module
