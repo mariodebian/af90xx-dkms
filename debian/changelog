@@ -1,3 +1,9 @@
+af90xx-dkms (0.0.4-0mario) unstable; urgency=low
+
+  * Update for 3.1.0 kernel
+
+ -- Mario Izquierdo (mariodebian) <mariodebian@gmail.com>  Tue, 15 Nov 2011 02:51:30 +0100
+
 af90xx-dkms (0.0.3-0ppa3) lucid; urgency=low
 
   * Check compability with 2.6.26 or 2.6.32
