@@ -243,7 +243,11 @@ int dvb_usb_remote_init(struct dvb_usb_device *d)
 int dvb_usb_remote_exit(struct dvb_usb_device *d)
 {
 	if (d->state & DVB_USB_STATE_REMOTE) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0)
+		cancel_delayed_work_sync(&d->rc_query_work);
+#else
 		cancel_rearming_delayed_work(&d->rc_query_work);
+#endif
 		flush_scheduled_work();
 		input_unregister_device(d->rc_input_dev);
 	}

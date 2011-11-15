@@ -168,6 +168,19 @@ struct dvb_usb_adapter_properties {
 				  unsigned int, void *, unsigned int);
 };
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0)
+/**
+ * enum dvb_usb_mode - Specifies if it is using a legacy driver or a new one
+ *		       based on rc-core
+ * This is initialized/used only inside dvb-usb-remote.c.
+ * It shouldn't be set by the drivers.
+ */
+enum dvb_usb_mode {
+	DVB_RC_LEGACY,
+	DVB_RC_CORE,
+};
+#endif
+
 /**
  * struct dvb_usb_device_properties - properties of a dvb-usb-device
  * @usb_ctrl: which USB device-side controller is in use. Needed for firmware
