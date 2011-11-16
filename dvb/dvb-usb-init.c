@@ -283,7 +283,7 @@ void dvb_usb_device_exit(struct usb_interface *intf)
 }
 EXPORT_SYMBOL(dvb_usb_device_exit);
 
-MODULE_VERSION("1.1");
+MODULE_VERSION("1.0");
 MODULE_AUTHOR("Patrick Boettcher <patrick.boettcher@desy.de>");
 MODULE_DESCRIPTION("A library module containing commonly used USB and DVB function USB DVB devices");
 MODULE_LICENSE("GPL");

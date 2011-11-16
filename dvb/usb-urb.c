@@ -101,7 +101,8 @@ static int usb_free_stream_buffers(struct usb_data_stream *stream)
 			stream->buf_num--;
 			deb_mem("freeing buffer %d\n",stream->buf_num);
 			usb_free_coherent(stream->udev, stream->buf_size,
-					stream->buf_list[stream->buf_num], stream->dma_addr[stream->buf_num]);
+					  stream->buf_list[stream->buf_num],
+					  stream->dma_addr[stream->buf_num]);
 		}
 	}
 
