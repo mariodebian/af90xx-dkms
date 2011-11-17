@@ -1,3 +1,12 @@
+af90xx-dkms (0.5-0mario1) unstable; urgency=low
+
+  * Update from 3.1 sources
+  * Complete update for 3.1.0, no compatible with lower
+  * Add script to compare files with kernel source
+  * Depends on linux-image (>= 3.1.0)
+
+ -- Mario Izquierdo (mariodebian) <mariodebian@gmail.com>  Thu, 17 Nov 2011 02:13:25 +0100
+
 af90xx-dkms (0.0.4-0mario) unstable; urgency=low
 
   * Update for 3.1.0 kernel
