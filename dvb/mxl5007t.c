@@ -20,7 +20,6 @@
 
 #include <linux/i2c.h>
 #include <linux/types.h>
-#include "compat.h"
 #include <linux/videodev2.h>
 #include "tuner-i2c.h"
 #include "mxl5007t.h"
@@ -156,11 +155,7 @@ struct mxl5007t_state {
 	struct list_head hybrid_tuner_instance_list;
 	struct tuner_i2c_props i2c_props;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,16)
 	struct mutex lock;
-#else
-	struct semaphore lock;
-#endif
 
 	struct mxl5007t_config *config;
 
@@ -375,6 +370,7 @@ static struct reg_pair_t *mxl5007t_calc_init_regs(struct mxl5007t_state *state,
 	mxl5007t_set_if_freq_bits(state, cfg->if_freq_hz, cfg->invert_if);
 	mxl5007t_set_xtal_freq_bits(state, cfg->xtal_freq_hz);
 
+	set_reg_bits(state->tab_init, 0x04, 0x01, cfg->loop_thru_enable);
 	set_reg_bits(state->tab_init, 0x03, 0x08, cfg->clk_out_enable << 3);
 	set_reg_bits(state->tab_init, 0x03, 0x07, cfg->clk_out_amp);
 
@@ -479,21 +475,15 @@ static int mxl5007t_write_reg(struct mxl5007t_state *state, u8 reg, u8 val)
 static int mxl5007t_write_regs(struct mxl5007t_state *state,
 			       struct reg_pair_t *reg_pair)
 {
-	struct i2c_msg msg = { .addr = state->i2c_props.addr, .flags = 0,
-			       .buf = (u8 *)reg_pair, .len = 0 };
-	int ret;
-	int i = 0;
+	unsigned int i = 0;
+	int ret = 0;
 
-	while (reg_pair[i].reg || reg_pair[i].val) {
+	while ((ret == 0) && (reg_pair[i].reg || reg_pair[i].val)) {
+		ret = mxl5007t_write_reg(state,
+					 reg_pair[i].reg, reg_pair[i].val);
 		i++;
-		msg.len += 2;
 	}
-	ret = i2c_transfer(state->i2c_props.adap, &msg, 1);
-	if (ret != 1) {
-		mxl_err("failed!");
-		return -EREMOTEIO;
-	}
-	return 0;
+	return ret;
 }
 
 static int mxl5007t_read_reg(struct mxl5007t_state *state, u8 reg, u8 *val)
@@ -768,11 +758,6 @@ static int mxl5007t_release(struct dvb_frontend *fe)
 static struct dvb_tuner_ops mxl5007t_tuner_ops = {
 	.info = {
 		.name = "MaxLinear MxL5007T",
-#if 0
-		.frequency_min  = ,
-		.frequency_max  = ,
-		.frequency_step = ,
-#endif
 	},
 	.init              = mxl5007t_init,
 	.sleep             = mxl5007t_sleep,
@@ -816,14 +801,9 @@ static int mxl5007t_get_chip_id(struct mxl5007t_state *state)
 		name = "MxL5007T.v4";
 		break;
 	default:
-#if 0
-		ret = -EINVAL;
-		goto fail;
-#else
 		name = "MxL5007T";
 		printk(KERN_WARNING "%s: unknown rev (%02x)\n", __func__, id);
 		id = MxL_UNKNOWN_ID;
-#endif
 	}
 	state->chip_id = id;
 	mxl_info("%s detected @ %d-%04x", name,
@@ -863,18 +843,6 @@ struct dvb_frontend *mxl5007t_attach(struct dvb_frontend *fe,
 			fe->ops.i2c_gate_ctrl(fe, 1);
 
 		ret = mxl5007t_get_chip_id(state);
-
-		if (fe->ops.i2c_gate_ctrl)
-			fe->ops.i2c_gate_ctrl(fe, 0);
-
-		/* check return value of mxl5007t_get_chip_id */
-		if (mxl_fail(ret))
-			goto fail;
-
-		if (fe->ops.i2c_gate_ctrl)
-			fe->ops.i2c_gate_ctrl(fe, 1);
-
-		ret = mxl5007t_write_reg(state, 0x04, state->config->loop_thru_enable);
 
 		if (fe->ops.i2c_gate_ctrl)
 			fe->ops.i2c_gate_ctrl(fe, 0);

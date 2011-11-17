@@ -13,7 +13,6 @@
 #include <linux/input.h>
 #include <linux/usb.h>
 #include <linux/firmware.h>
-#include "compat.h"
 #include <linux/mutex.h>
 #include <media/rc-core.h>
 
@@ -76,30 +75,19 @@ struct dvb_usb_device_description {
 	struct usb_device_id *warm_ids[DVB_USB_ID_MAX_NUM];
 };
 
-/**
- * struct dvb_usb_rc_key - a remote control key and its input-event
- * @custom: the vendor/custom part of the key
- * @data: the actual key part
- * @event: the input event assigned to key identified by custom and data
- */
-struct dvb_usb_rc_key {
-	u16 scan;
-	u32 event;
-};
-
-static inline u8 rc5_custom(struct dvb_usb_rc_key *key)
+static inline u8 rc5_custom(struct rc_map_table *key)
 {
-	return (key->scan >> 8) & 0xff;
+	return (key->scancode >> 8) & 0xff;
 }
 
-static inline u8 rc5_data(struct dvb_usb_rc_key *key)
+static inline u8 rc5_data(struct rc_map_table *key)
 {
-	return key->scan & 0xff;
+	return key->scancode & 0xff;
 }
 
-static inline u8 rc5_scan(struct dvb_usb_rc_key *key)
+static inline u16 rc5_scan(struct rc_map_table *key)
 {
-	return key->scan & 0xffff;
+	return key->scancode & 0xffff;
 }
 
 struct dvb_usb_device;
@@ -169,7 +157,48 @@ struct dvb_usb_adapter_properties {
 				  unsigned int, void *, unsigned int);
 };
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0)
+/**
+ * struct dvb_rc_legacy - old properties of remote controller
+ * @rc_map_table: a hard-wired array of struct rc_map_table (NULL to disable
+ *  remote control handling).
+ * @rc_map_size: number of items in @rc_map_table.
+ * @rc_query: called to query an event event.
+ * @rc_interval: time in ms between two queries.
+ */
+struct dvb_rc_legacy {
+/* remote control properties */
+#define REMOTE_NO_KEY_PRESSED      0x00
+#define REMOTE_KEY_PRESSED         0x01
+#define REMOTE_KEY_REPEAT          0x02
+	struct rc_map_table  *rc_map_table;
+	int rc_map_size;
+	int (*rc_query) (struct dvb_usb_device *, u32 *, int *);
+	int rc_interval;
+};
+
+/**
+ * struct dvb_rc properties of remote controller, using rc-core
+ * @rc_codes: name of rc codes table
+ * @protocol: type of protocol(s) currently used by the driver
+ * @allowed_protos: protocol(s) supported by the driver
+ * @driver_type: Used to point if a device supports raw mode
+ * @change_protocol: callback to change protocol
+ * @rc_query: called to query an event event.
+ * @rc_interval: time in ms between two queries.
+ * @bulk_mode: device supports bulk mode for RC (disable polling mode)
+ */
+struct dvb_rc {
+	char *rc_codes;
+	u64 protocol;
+	u64 allowed_protos;
+	enum rc_driver_type driver_type;
+	int (*change_protocol)(struct rc_dev *dev, u64 rc_type);
+	char *module_name;
+	int (*rc_query) (struct dvb_usb_device *d);
+	int rc_interval;
+	bool bulk_mode;				/* uses bulk mode */
+};
+
 /**
  * enum dvb_usb_mode - Specifies if it is using a legacy driver or a new one
  *		       based on rc-core
@@ -180,7 +209,6 @@ enum dvb_usb_mode {
 	DVB_RC_LEGACY,
 	DVB_RC_CORE,
 };
-#endif
 
 /**
  * struct dvb_usb_device_properties - properties of a dvb-usb-device
@@ -200,11 +228,7 @@ enum dvb_usb_mode {
  * @identify_state: called to determine the state (cold or warm), when it
  *  is not distinguishable by the USB IDs.
  *
- * @rc_key_map: a hard-wired array of struct dvb_usb_rc_key (NULL to disable
- *  remote control handling).
- * @rc_key_map_size: number of items in @rc_key_map.
- * @rc_query: called to query an event event.
- * @rc_interval: time in ms between two queries.
+ * @rc: remote controller properties
  *
  * @i2c_algo: i2c_algorithm if the device has I2CoverUSB.
  *
@@ -248,14 +272,11 @@ struct dvb_usb_device_properties {
 	int (*identify_state)   (struct usb_device *, struct dvb_usb_device_properties *,
 			struct dvb_usb_device_description **, int *);
 
-/* remote control properties */
-#define REMOTE_NO_KEY_PRESSED      0x00
-#define REMOTE_KEY_PRESSED         0x01
-#define REMOTE_KEY_REPEAT          0x02
-	struct dvb_usb_rc_key  *rc_key_map;
-	int rc_key_map_size;
-	int (*rc_query) (struct dvb_usb_device *, u32 *, int *);
-	int rc_interval;
+	struct {
+		enum dvb_usb_mode mode;	/* Drivers shouldn't touch on it */
+		struct dvb_rc_legacy legacy;
+		struct dvb_rc core;
+	} rc;
 
 	struct i2c_algorithm *i2c_algo;
 
@@ -368,7 +389,8 @@ struct dvb_usb_adapter {
  *
  * @i2c_adap: device's i2c_adapter if it uses I2CoverUSB
  *
- * @rc_input_dev: input device for the remote control.
+ * @rc_dev: rc device for the remote control (rc-core mode)
+ * @input_dev: input device for the remote control (legacy mode)
  * @rc_query_work: struct work_struct frequent rc queries
  * @last_event: last triggered event
  * @last_state: last state (no, pressed, repeat)
@@ -401,7 +423,8 @@ struct dvb_usb_device {
 	struct dvb_usb_adapter adapter[MAX_NO_OF_ADAPTER_PER_DEVICE];
 
 	/* remote control */
-	struct input_dev *rc_input_dev;
+	struct rc_dev *rc_dev;
+	struct input_dev *input_dev;
 	char rc_phys[64];
 	struct delayed_work rc_query_work;
 	u32 last_event;

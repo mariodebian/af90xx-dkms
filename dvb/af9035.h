@@ -185,21 +185,6 @@ struct af9035_firmware_header {
 };
 
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 39)
-#if defined(CONFIG_MEDIA_TUNER_MXL5007T) || (defined(CONFIG_MEDIA_TUNER_MXL5007T_MODULE) && defined(MODULE))
-extern struct dvb_frontend *mxl5007t_attach(struct dvb_frontend *fe,
-                                            struct i2c_adapter *i2c, u8 addr,
-                                            struct mxl5007t_config *cfg);
-#else
-static inline struct dvb_frontend *mxl5007t_attach(struct dvb_frontend *fe,
-                                                   struct i2c_adapter *i2c,
-                                                   u8 addr,
-                                                   struct mxl5007t_config *cfg)
-{
-        printk(KERN_WARNING "%s: driver disabled by Kconfig\n", __func__);
-        return NULL;
-}
-#endif
-#endif
+
 
 #endif
