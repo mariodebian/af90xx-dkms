@@ -1,4 +1,4 @@
-af90xx-dkms (0.5) unstable; urgency=low
+af90xx-dkms (0.5-0mario1) unstable; urgency=low
 
   * Update from 3.1 sources
   * Complete update for 3.1.0, no compatible with lower

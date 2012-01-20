@@ -15,13 +15,12 @@ sname:=af90xx
 
 sversion:=$(shell dpkg-parsechangelog|grep "^Version:"|cut -d" " -f2|rev|cut -d- -f2-|rev|cut -d':' -f2)
 
-build-arch:
-build-indep:
+
 build:
 
 clean:
 	dh_testdir
-	dh_prep
+	dh_clean
 
 install: DH_OPTIONS=
 install: build

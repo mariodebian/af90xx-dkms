@@ -16,8 +16,6 @@ for f in *; do
       echo "SAME FILE $NEW dvb/$f"
     fi
 
-  else
-    echo "NEW FILE $f"
   fi
 
 done
