@@ -14,6 +14,7 @@ obj-$(CONFIG_DVB_CORE) += dvb-core.o
 obj-m += af9033.o
 obj-m += tua9001.o
 obj-m += mxl5007t.o
+obj-m += tuner_tda18218.o
 obj-m += dvb-usb-af9035.o
 
 

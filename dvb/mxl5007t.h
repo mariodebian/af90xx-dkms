@@ -73,7 +73,7 @@ struct mxl5007t_config {
 	enum mxl5007t_xtal_freq xtal_freq_hz;
 	enum mxl5007t_if_freq if_freq_hz;
 	unsigned int invert_if:1;
-	unsigned int loop_thru_enable:1;
+	unsigned int loop_thru_enable:2;
 	unsigned int clk_out_enable:1;
 };
 

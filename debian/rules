@@ -4,7 +4,7 @@
 #export DH_VERBOSE=1
 
 #MODS=af9013 af9033 dvb-core dvb-usb-af9005 dvb-usb-af9015 dvb-usb-af9035 dvb-usb mxl5007t tua9001
-MODS=af9033 dvb-core dvb-usb-af9035 dvb-usb mxl5007t tua9001
+MODS=af9033 dvb-core dvb-usb-af9035 dvb-usb mxl5007t tua9001 tuner_tda18218
 export I=0
 
 # Name of the dkms package

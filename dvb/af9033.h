@@ -37,6 +37,7 @@ enum af9033_tuner {
 	AF9033_TUNER_TUA9001    = 0x27, /* Infineon TUA 9001 */
 	AF9033_TUNER_FC0011     = 0x28, /* Fitipower FC0011 */
 	AF9033_TUNER_MXL5007t   = 0xa0, /* Maxlinear MXL5007t */
+        AF9033_TUNER_TDA18218   = 0xa1, /* NXP TDA 18218HN */
 };
 
 /* clock setting table:

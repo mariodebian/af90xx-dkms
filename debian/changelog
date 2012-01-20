@@ -1,3 +1,10 @@
+af90xx-dkms (0.6) unstable; urgency=low
+
+  * Update for 3.2.0 kernel
+  * Add IR support from https://github.com/OpenELEC/OpenELEC.tv
+
+ -- Mario Izquierdo (mariodebian) <mariodebian@gmail.com>  Fri, 20 Jan 2012 13:46:34 +0100
+
 af90xx-dkms (0.5) unstable; urgency=low
 
   * Update from 3.1 sources
